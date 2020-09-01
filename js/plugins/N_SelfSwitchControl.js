@@ -70,7 +70,7 @@
  * @default A
  * 
  * 
- * @help Version 1.0.0
+ * @help Version 1.1.0
  * ============================================================================
  * Plugin Commands
  * ============================================================================
@@ -83,7 +83,9 @@
  * 
  *      Event:  The affected events. Examples:
  *                  3:      affects event 3.
+ *                  2,4:    affects events 2 and 4.
  *                  5-12:   affects events 5 to 12.
+ *                  1-3,5:  affects events 1 to 3, and 5.
  *                  all:    affects all events on the map.
  * 
  *      Switch: The Self Switch to change.
@@ -99,49 +101,40 @@
     const COMMAND_ARG_STATE_OFF = "Off";
     const COMMAND_ARG_STATE_TOGGLE = "Toggle";
     const COMMAND_ARG_EVENT_ALL = "all"
+    const COMMAND_ARG_EVENT_SEPARATOR = ",";
     const COMMAND_ARG_EVENT_RANGE_SEPARATOR = "-";
 
     PluginManager.registerCommand(PLUGIN_NAME, COMMAND_SELFSWITCH, function (args) {
-        if (!isValidEventId(args.event)) return;
-
         const mapId = Number(args.map) || this._mapId;
         for (const eventId of getEventIds(args.event))
             changeSelfSwitch(mapId, eventId, args.switch, args.state);
     });
 
-    function isValidEventId(id) {
-        let split = id.split(COMMAND_ARG_EVENT_RANGE_SEPARATOR);
-        return id === COMMAND_ARG_EVENT_ALL || split.every((part) => { return isValidId(part); });
-    }
-
-    function isValidId(id) {
-        return !isNaN(id) && Number.isInteger(Number(id));
-    }
-
-    function getEventIds(eventId) {
-        if (eventId === COMMAND_ARG_EVENT_ALL) {
-            return getAllEventIDs();
-        } else if (eventId.indexOf(COMMAND_ARG_EVENT_RANGE_SEPARATOR) >= 0) {
-            const split = eventId.split("-");
-            const first = Number(split[0]);
-            const last = Number(split[1]);
-            return getEventIDsInRange(first, last);
+    function* getEventIds(events) {
+        if (events === COMMAND_ARG_EVENT_ALL) {
+            for (const id of getAllEventIDs())
+                yield id;
+        } else {
+            const groups = events.split(COMMAND_ARG_EVENT_SEPARATOR);
+            for (const range of groups) {
+                for (const id of getEventIDsInRange(range))
+                    yield id;
+            }
         }
-
-        return (function* () { yield Number(eventId) })();
     }
 
-    function* getEventIDsInRange(first, last) {
-        let i = first;
-        while (i <= last) {
+    function* getEventIDsInRange(range) {
+        const split = range.split(COMMAND_ARG_EVENT_RANGE_SEPARATOR);
+
+        let i = Number(split[0]);
+        const end = Number(split[1]) || i;
+        while (i <= end)
             yield i++;
-        }
     }
 
     function* getAllEventIDs() {
-        for (const event of $dataMap.events.filter(e => e)) {
+        for (const event of $dataMap.events.filter(e => e))
             yield event.id;
-        }
     }
 
     function changeSelfSwitch(mapId, eventId, switchId, state) {

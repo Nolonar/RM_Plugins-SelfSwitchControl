@@ -70,7 +70,7 @@
  * @default A
  * 
  * 
- * @help Version 1.1.0
+ * @help Version 1.1.1
  * ============================================================================
  * Plugin Commands
  * ============================================================================
@@ -115,7 +115,7 @@
             for (const id of getAllEventIDs())
                 yield id;
         } else {
-            const groups = events.split(COMMAND_ARG_EVENT_SEPARATOR);
+            const groups = events.replace(/\s/g, "").split(COMMAND_ARG_EVENT_SEPARATOR);
             for (const range of groups) {
                 for (const id of getEventIDsInRange(range))
                     yield id;

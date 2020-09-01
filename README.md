@@ -3,7 +3,7 @@ Control Self Switches from other events and maps.
 
 | Project             | Latest release   |
 | ------------------- | ---------------- |
-| N_SelfSwitchControl | [1.0.0][release] |
+| N_SelfSwitchControl | [1.1.0][release] |
 
 [All RPG Maker plugins by Nolonar][hub]
 
